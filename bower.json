@@ -1,0 +1,23 @@
+{
+  "name": "P5UdacityNanoMap",
+  "homepage": "https://github.com/markpj1/testbuild",
+  "authors": [
+    "markpj1 <markpjaramillo@gmail.com>"
+  ],
+  "description": "Udacity P5 Map Api project",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "knockout": "~3.4.0",
+    "jquery": "~2.2.0",
+    "bootstrap": "~3.3.6"
+  }
+}
