@@ -1,1 +1,137 @@
-index.html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html" />
+    <title>
+      Knockout : MapsApp
+    </title>
+
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <script src="bower_components/jquery/dist/jquery.min.js">
+    </script>
+    <script src="bower_components/knockout/dist/knockout.js">
+    </script>
+    <script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.min.js">
+    </script>    
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places">
+    </script>
+    
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              Address search google API.
+            </div>
+            <div class="panel-body">
+              <div id="addressFromFields" class="form-group">
+                <label for="autoCompleteFromAddress">
+                  Address search
+                </label>
+                <input id="autocompleteFromAddress" class="form-control" data-bind="addressAutoComplete: mapsApplication.mapsModel.fromAddress" placeholder="Enter address to search" type="text"></input>
+              </div>                      
+            </div>
+          </div>
+        </div>
+      </div>
+
+        <div class="row">
+         <div class="col-md-6">
+          
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              Results
+            </div>
+            <div class="panel-body" data-bind="with: mapsApplication.mapsModel.fromAddress">
+              <div class="col-md-12" data-bind="visible: streetNumber">
+                <strong>
+                  Street number: 
+                </strong>
+                <span data-bind="text: streetNumber">
+                </span>
+              </div>
+              <div class="col-md-12" data-bind="visible: streetName">
+                <strong>
+                  Street name: 
+                </strong>
+                <span data-bind="text: streetName">
+                </span>
+              </div>
+              <div class="col-md-12" data-bind="visible: city">
+                <strong>
+                  City: 
+                </strong>
+                <span data-bind="text: city">
+                </span>
+              </div>
+              <div class="col-md-12" data-bind="visible: state">
+                <strong>
+                  State: 
+                </strong>
+                <span data-bind="text: state">
+                </span>
+              </div>
+              <div class="col-md-12" data-bind="visible: postCode">
+                <strong>
+                  Post code: 
+                </strong>
+                <span data-bind="text: postCode">
+                </span>
+              </div>
+              <div class="col-md-12" data-bind="visible: country">
+                <strong>
+                  Country: 
+                </strong>
+                <span data-bind="text: country">
+                </span>
+              </div>
+              <div class="col-md-12" data-bind="visible: location()">
+                <strong>
+                  Latitude: 
+                </strong>
+                <span data-bind="text: location().lat()">
+                </span>
+              </div>
+              <div class="col-md-12" data-bind="visible: location()">
+                <strong>
+                  Longitude: 
+                </strong>
+                <span data-bind="text: location().lng()">
+                </span>
+              </div>              
+            </div>
+          </div>
+        </div>
+
+         <div class="row">
+          <div class="col-md-6">
+            <div class="panel panel-default">
+              <div class="panel-heading">Map</div>
+                <div class="panel-body">
+                  <div data-bind="mapPanel" class="map-canvas"></div>
+                </div>
+            </div>
+          </div>  
+        </div>
+
+
+       </div>
+
+
+   
+
+    </div>
+
+
+
+
+</body>
+    <script type="text/javascript" src="js/view.js"></script>
+    
+</html>
