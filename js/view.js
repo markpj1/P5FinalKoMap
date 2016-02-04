@@ -1,10 +1,13 @@
 var mapsApplication = function () {
-
+    
 	var map;
+    
 
 	//Sets local default
-	var localLocation = {lat: 38.235, lng:-122.668};
-
+    this.currentLat = ko.observable(38.235);
+    this.currentLng = ko.observable(-122.668);
+	var localLocation  = {lat: this.currentLat() , lng: this.currentLng()};
+       
 	    var addressComponents = {
     	street_number: 'short_name', 
     	route: 'long_name',
@@ -25,16 +28,17 @@ var mapsApplication = function () {
 		self.city = ko.observable();
 		self.state = ko.observable();
 		self.postCode = ko.observable();
-		self.country = ko.observable();		
+		self.country = ko.observable();
+        self.food = ko.observable();	
 	};
 
 
     //called in return statement
 	var mapsModel = {
-		fromAddress: ko.observable(),
+		fromAddress: ko.observable()
 		
 	};
-
+    
 	//Method to retrieve address information in the model.
 	var populateAddress = function (place, value) {
 
@@ -44,8 +48,9 @@ var mapsApplication = function () {
 		address.location(place.geometry.location);
 		//loop through the components and extract required
 		//address fields
-        for (var i = 0; i < place.address_components.length; i += 1) {
-        	var addressType = place.address_components[i].types[0];
+        for (var i = 0; i < place.address_components.length; i += 1) {   
+       	
+            var addressType = place.address_components[i].types[0];
         	if(addressComponents[addressType]) {
         		var val =
         		place.address_components[i][addressComponents[addressType]];
@@ -71,7 +76,7 @@ var mapsApplication = function () {
         			address.idNumber(val);
         		}
         	}
-        };
+        }
         value(address);
 	};
 
@@ -80,14 +85,14 @@ var mapsApplication = function () {
 	var setLocalLocation = function () {
 		if('geolocation' in navigator) {
 			navigator.geolocation.getCurrentPosition(function (position) {
- 				localLocation.lat = position.coords.latitude;
- 				localLocation.lng = position.coords.longitude;
- 				console.log('successfully retrieved local location. Lat [' + localLocation.lat + '] lng [' + localLocation.lng + ']');
+ 				currentLat = position.coords.latitude;
+ 				currentLng = position.coords.longitude;
+ 				console.log('successfully retrieved local location. Lat [' + currentLat + '] lng [' + currentLng + ']');
 			},
 			function (error) {
 				console.log('Could not get the coords: ' + error.message);
 			});
-		};
+		}
 	};
 
 
@@ -106,7 +111,7 @@ var mapsApplication = function () {
     			
     			google.maps.event.addListener(autocomplete, 'place_changed', function () {
     				var place = autocomplete.getPlace();
-    				console.log('place obj', place);
+    				
     				updateAddress(place, value);
     			});
     		}
@@ -114,7 +119,10 @@ var mapsApplication = function () {
     	//custom binding handler for maps panel
     	ko.bindingHandlers.mapPanel = {
     		init: function (element, valueAccessor) {
-          	map = new google.maps.Map(element, {zoom: 10
+          	map = new google.maps.Map(element, {
+                zoom: 10,
+                scrollwheel: false
+
           	});
           	centerMap(localLocation);          	
     	    }
@@ -133,7 +141,7 @@ var mapsApplication = function () {
     var updateAddress = function (place, value) {
     	populateAddress(place, value);
     	placeMarker(place.geometry.location, value);
-    }
+    };
 
 
 
@@ -162,6 +170,8 @@ var mapsApplication = function () {
 
 
     var init = function () {
+        
+
     	//initialize setLocalLocation
     	setLocalLocation();
 
@@ -173,7 +183,7 @@ var mapsApplication = function () {
 
     	//initialize this module
     	ko.applyBindings(mapsApplication);
-    }
+    };
 
     $(init);
 
