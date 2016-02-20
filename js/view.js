@@ -1,201 +1,100 @@
-var mapsApplication = function () {
-    
-	var map;
-    
+// Client id Foursquare:
+// CYQXZPHH1KFEC0AQFBB3NLNSOE2KOQWJ40AU3BIG0YWLI2ZX
+// Client secret:
+// MJV2WN3QLPZAHPMQ4GT5U212AVUPPZVDEKN3DCEOHFE4AMXW
+var mapsApplication = function() {
+  var self = this;
+  var map;
+  
 
-	//Sets local default
-    this.currentLat = ko.observable(38.235);
-    this.currentLng = ko.observable(-122.668);
-	var localLocation  = {lat: this.currentLat() , lng: this.currentLng()};
-       
-	    var addressComponents = {
-    	street_number: 'short_name', 
-    	route: 'long_name',
-    	locality: 'long_name',
-    	administrative_area_level_1: 'long_name',
-    	country: 'long_name',
-    	postal_code: 'short_name'    	
-    };
-
-	//Constructor function for google map obj.
-	var AddressModel = function () {
-        var self = this;
-
-        self.marker = ko.observable();
-		self.location = ko.observable();
-		self.streetNumber = ko.observable();
-		self.streetName = ko.observable();
-		self.city = ko.observable();
-		self.state = ko.observable();
-		self.postCode = ko.observable();
-		self.country = ko.observable();
-        self.food = ko.observable();	
-	};
+  //viewModel for knockout bindings to DOM
+ self.placeHolder = {
+    nameArr: nameArr = ko.observableArray([]), //.name
+    address: address = ko.observableArray([]), //.location.address 
+    contact: contact = ko.observableArray([]), //.contact.formattedPhone
+    url: url = ko.observableArray([]), //.location.url
+    lat: lat = ko.observableArray([]), //.location.formattedAddress.lat
+    lng: lng = ko.observableArray([]) //.location.formattedAddress.lng             
+  };
 
 
-    //called in return statement
-	var mapsModel = {
-		fromAddress: ko.observable()
-		
-	};
-    
-	//Method to retrieve address information in the model.
-	var populateAddress = function (place, value) {
+  console.log('placeHolder', self.placeHolder);
+  //builds map for app 
+  map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 15,
+    center: new google.maps.LatLng(38.235738, -122.641123),
+    mapTypeId: google.maps.MapTypeId.ROADMAP,
+    scrollwheel: false,
+    disableDefaultUI: true
+  });
 
-		var address = new AddressModel();
-		//set location
 
-		address.location(place.geometry.location);
-		//loop through the components and extract required
-		//address fields
-        for (var i = 0; i < place.address_components.length; i += 1) {   
-       	
-            var addressType = place.address_components[i].types[0];
-        	if(addressComponents[addressType]) {
-        		var val =
-        		place.address_components[i][addressComponents[addressType]];
-        		if(addressType == 'street_number') {
-        			address.streetNumber(val);
-        		}
-        		else if (addressType == 'route') {
-        			address.streetName(val);
-        		}
-        		else if (addressType == 'locality') {
-        			address.city(val);
-        		}
-        		else if (addressType == 'administrative_area_level_1') {
-        			address.state(val);
-        		}
-        		else if (addressType == 'country') {
-        			address.country(val);
-        		}
-        		else if (addressType == 'postal_code') {
-        			address.postCode(val);
-        		}
-        		else if (addressType == 'id_number') {
-        			address.idNumber(val);
-        		}
-        	}
+  //gets foursquare JSON OBJ with info
+  var fourSquareAPI = 'https://api.foursquare.com/v2/venues/explore?client_id=CYQXZPHH1KFEC0AQFBB3NLNSOE2KOQWJ40AU3BIG0YWLI2ZX&client_secret=MJV2WN3QLPZAHPMQ4GT5U212AVUPPZVDEKN3DCEOHFE4AMXW&v=20131016&ll=38.23%2C%20-122.64&section=food&limit=5&novelty=new';
+
+$.getJSON(fourSquareAPI, function() {}).done(function(data) {
+    var fourSquareObj = data.response.groups['0'].items;
+    console.log('FSO', fourSquareObj);
+    $.each(fourSquareObj, function(key, val) {
+      var formattedVenue = val.venue;
+      placeHolder.nameArr.push(formattedVenue.name);
+      placeHolder.address.push(formattedVenue.location.formattedAddress);
+      placeHolder.contact.push(formattedVenue.contact.formattedPhone);
+      placeHolder.url.push(formattedVenue.url);
+      placeHolder.lat.push(formattedVenue.location.lat);
+      placeHolder.lng.push(formattedVenue.location.lng);
+
+      //var bounceMarker = formattedVenue.location.lat + ' ' + formattedVenue.location.lng
+      var contentString = '<div>' + formattedVenue.name + '</div>' + '<div>' + formattedVenue.location.formattedAddress + '</div>' + '<div>' + formattedVenue.contact.formattedPhone + '<div>' + '<div>' + '<a href=' + formattedVenue.url + '>' + formattedVenue.url + '</a>' + '</div>';
+      var markerCoordinates = new google.maps.LatLng(formattedVenue.location.lat, formattedVenue.location.lng);
+
+
+      var marker = new google.maps.Marker({
+        animation: google.maps.Animation.DROP,
+        position: markerCoordinates,
+        map: map,
+        icon: 'pics/restaurant.png'
+      });
+
+      //console.log('contentString', contentString);
+
+      var infowindow = new google.maps.InfoWindow({
+        content: contentString
+      });
+
+      //function toggleBounce() {
+      google.maps.event.addListener(marker, 'click', function() {
+        if (marker.getAnimation() != null) {
+          marker.setAnimation(null);
+        } else if (infowindow.open() != null) {
+          infowindow.open(null);
+        } else {
+          marker.setAnimation(google.maps.Animation.BOUNCE);
+          infowindow.open(map, marker);
+
         }
-        value(address);
-	};
-
-
-	//Method to retrieve and set local location.
-	var setLocalLocation = function () {
-		if('geolocation' in navigator) {
-			navigator.geolocation.getCurrentPosition(function (position) {
- 				currentLat = position.coords.latitude;
- 				currentLng = position.coords.longitude;
- 				console.log('successfully retrieved local location. Lat [' + currentLat + '] lng [' + currentLng + ']');
-			},
-			function (error) {
-				console.log('Could not get the coords: ' + error.message);
-			});
-		}
-	};
+      });
+    });
+  }).fail(function () {
+    alert('Failed to load, Please refresh')
+  });
 
 
 
-		//Method to add custom binding handlers to knockout.
-    var configureBindingHandlers = function () {
-    	//Custom binding for address auto complete.
-    	ko.bindingHandlers.addressAutoComplete = {
-    		init: function (element, valueAccessor) {
-    			//create the autocomplete object.
-	            var autocomplete = new google.maps.places.Autocomplete(element,{ types: ['geocode'] });
-    			
-    			//when the user selects an address from the dropdown, populate 
-    			//the address in the model.
-    			var value = valueAccessor();
-    			
-    			google.maps.event.addListener(autocomplete, 'place_changed', function () {
-    				var place = autocomplete.getPlace();
-    				
-    				updateAddress(place, value);
-    			});
-    		}
-    	};
-    	//custom binding handler for maps panel
-    	ko.bindingHandlers.mapPanel = {
-    		init: function (element, valueAccessor) {
-          	map = new google.maps.Map(element, {
-                zoom: 10,
-                scrollwheel: false
+  var init = function() {
 
-          	});
-          	centerMap(localLocation);          	
-    	    }
-        };
-    };
-
-    //Method to register subscriber
-    var registerSubscribers = function () {
-    	//fire before from address is changed
-    	mapsModel.fromAddress.subscribe(function (oldValue) {
-    		removeMarker(oldValue);
-    	}, null, 'beforeChange');
-    };
-
-    //Method to update the address model
-    var updateAddress = function (place, value) {
-    	populateAddress(place, value);
-    	placeMarker(place.geometry.location, value);
-    };
+    //initMap();
+    //initialize this module
+    ko.applyBindings(mapsApplication);
+  };
 
 
-
-    //Method to place a marker on the map
-    var placeMarker = function (location, value) {
-    	//create and place marker on the map
-    	var marker = new google.maps.Marker({
-    		position: location,
-    		map: map
-    	});
-    	value().marker(marker);
-    };
-
-    //method to remove old marker from the map
-    var removeMarker = function(address) {
-    	if(address != null) {
-    		address.marker().setMap(null);
-    	}
-    };
-
-    //Method to center map based on the location.
-    var centerMap = function (location) {
-    	map.setCenter(location);
-    	google.maps.event.trigger(map, 'resize');
-    };
+  $(init);
 
 
-    var init = function () {
-        
-
-    	//initialize setLocalLocation
-    	setLocalLocation();
-
-    	//initialize registerSubscriber
-    	registerSubscribers();
-    	
-        //initialize binding handlers.
-    	configureBindingHandlers();
-
-    	//initialize this module
-    	ko.applyBindings(mapsApplication);
-    };
-
-    $(init);
-
-    console.log('maps model: ',mapsModel);
-    return {
-    	mapsModel: mapsModel
-    };
-
-
-
-
-
+  return {
+    placeHolder: placeHolder
+  };
 
 
 
