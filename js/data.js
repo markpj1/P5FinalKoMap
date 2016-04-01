@@ -8,29 +8,21 @@ var FourSquareClient = function (url) {
       url: baseUrl,
       type: 'Get',
       success: function (result) {
-         //console.log('Foursquare Locations: ' +
-          //JSON.stringify(result));
-         callback(result);
+         // console.log('Foursquare Locations: ' +
+         //  JSON.stringify(result));
+            
+          callback(result);
       }
-    });
+    })
   };
-  // //Method to delete product
-  // var deleteLocations = function(product, callback) {
-  //   console.log('Deleting product with ID ['  + product.data.id() + ']');
-  //   $.ajax({
-  //     url: baseUrl + product.data.id(),
-  //     type: 'DELETE',
-  //     success: function (result) {
-  //       callback(product);
-  //     }
-  //   });
-  // };
-
+  
   return {
     //add members that will be exposed publicly
     getLocations: getLocations
     //deleteLocations: deleteLocations
-
-  };
-
+  }   
 };
+
+
+
+
