@@ -6,11 +6,18 @@
 
 
 var MapsApplication = (function() {
+
+  var self = this;
+  var map;
+  var localLocation = {lat:38.235738, lng:-122.641123};
+  var fourSquareAPI = FourSquareClient('https://api.foursquare.com/v2/venues/explore?client_id=CYQXZPHH1KFEC0AQFBB3NLNSOE2KOQWJ40AU3BIG0YWLI2ZX&client_secret=MJV2WN3QLPZAHPMQ4GT5U212AVUPPZVDEKN3DCEOHFE4AMXW&v=20131016&ll=38.23%2C%20-122.64&section=food&limit=5&novelty=new');  
+  var fourSquareObj;
+  var locationSearch;
   
- var locationModel = function (item) {
+ self.locationModel = function (item) {
     var self = this;
     self.data = {};
-    self.data.location = ko.observable(item.location); //.location.address 
+    self.data.location = item.location; //.location.address 
     self.data.formattedAddress = ko.observable(item.location.formattedAddress);
     self.data.lat = ko.observable(item.location.lat); //.location.formattedAddress.lat
     self.data.lng = ko.observable(item.location.lng); //.location.formattedAddress.lng   
@@ -20,42 +27,32 @@ var MapsApplication = (function() {
     self.data.url = ko.observable(item.url); //.location.url
   };
   
-  var self = this;
-  var map;
-  var localLocation = {lat:38.235738, lng:-122.641123};
-  var fourSquareAPI = FourSquareClient('https://api.foursquare.com/v2/venues/explore?client_id=CYQXZPHH1KFEC0AQFBB3NLNSOE2KOQWJ40AU3BIG0YWLI2ZX&client_secret=MJV2WN3QLPZAHPMQ4GT5U212AVUPPZVDEKN3DCEOHFE4AMXW&v=20131016&ll=38.23%2C%20-122.64&section=food&limit=5&novelty=new');  
-  var fourSquareObj;
-  var locationSearch;
   //viewModel for knockout bindings to DOM
-  var mapModel = [
+  self.mapModel = [
     {
     "name": "Central Market Restaurant",    
-    "lat": 38.234017108732495,
-    "lng": -122.64014482498169    
+    "latLng": {"lat": 38.234017108732495,
+    "lng": -122.64014482498169}    
     },  
     {
     "name": "Cucina Paradiso",    
-    "lat": 38.234490283333336,
-    "lng": -122.6403   
+    "latLng" : {"lat": 38.234490283333336,"lng": -122.6403}   
     },  
     {
     "name": "Aqus Cafe",  
-    "lat": 38.23130418393807,
-    "lng": -122.63134140350398   
+    "latLng": {"lat": 38.23130418393807,"lng": -122.63134140350398}   
     },  
     {
     "name": "Wild Goat Bistro" , 
-    "lat": 38.233859,
-    "lng": -122.638846   
+    "latLng" : {"lat": 38.233859,"lng": -122.638846}   
     },  
     {
     "name": "Cafe Zazzle" , 
-    "lat": 38.23433575,
-    "lng": -122.64162   
+    "latLng": {"lat": 38.23433575,"lng": -122.64162}   
     },  
-  ];  
+  ];
 
-  self.mapModel = ko.observableArray(mapModel);  
+
 
   self.locations = ko.observableArray();
     
@@ -72,15 +69,27 @@ var MapsApplication = (function() {
         return item.name().toLowerCase().indexOf(filter) !== -1;
       });
     }
+  });
+
+  self.allPlaces = [];
+
+  self.mapModel.forEach(function (values) {
+    self.allPlaces.push(new Place(values));
   })
+
+  var Place = function (data) {
+    this.name = data.name;
+    this.latLng = data.latLng;
+    this.marker = null;
+  }
   
   //Methods to retrieve locations info using foursquare 
-  self.retrieveLocations = function () {
+  var retrieveLocations = function () {
     console.log('retrieving locations from server: ');
     fourSquareAPI.getLocations(retrieveLocationsCallback);
   };
 
-  self.retrieveLocationsCallback = function (data) {
+  var retrieveLocationsCallback = function (data) {
       fourSquareObj = data.response.groups['0'].items;
       var dataFromServer = ko.utils.parseJson(fourSquareObj);
        dataFromServer = $.map(fourSquareObj,function (value, key) {
@@ -128,7 +137,7 @@ var MapsApplication = (function() {
             
        //}
 
-  self.placeMarker = function () {
+  var placeMarker = function () {
     console.log('LookFirst',locations())
         locations().forEach(function(value, key) {
           console.log('placeMarker locations obj', value.lat()); 
