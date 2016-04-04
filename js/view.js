@@ -31,8 +31,7 @@ var MapsApplication = (function() {
   self.mapModel = [
     {
     "name": "Central Market Restaurant",    
-    "latLng": {"lat": 38.234017108732495,
-    "lng": -122.64014482498169}    
+    "latLng": {"lat": 38.234017108732495, "lng": -122.64014482498169}    
     },  
     {
     "name": "Cucina Paradiso",    
