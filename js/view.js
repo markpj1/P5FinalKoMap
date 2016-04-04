@@ -11,20 +11,20 @@ var MapsApplication = (function() {
   var map;
   var localLocation = {lat:38.235738, lng:-122.641123};
   var fourSquareAPI = FourSquareClient('https://api.foursquare.com/v2/venues/explore?client_id=CYQXZPHH1KFEC0AQFBB3NLNSOE2KOQWJ40AU3BIG0YWLI2ZX&client_secret=MJV2WN3QLPZAHPMQ4GT5U212AVUPPZVDEKN3DCEOHFE4AMXW&v=20131016&ll=38.23%2C%20-122.64&section=food&limit=5&novelty=new');  
-  var fourSquareObj;
+  //var fourSquareObj;
   var locationSearch;
-  
+  //console.log('FSO',fourSquareObj)
  self.locationModel = function (item) {
     var self = this;
     self.data = {};
     self.data.location = item.location; //.location.address 
-    self.data.formattedAddress = ko.observable(item.location.formattedAddress);
-    self.data.lat = ko.observable(item.location.lat); //.location.formattedAddress.lat
-    self.data.lng = ko.observable(item.location.lng); //.location.formattedAddress.lng   
-    self.data.contact = ko.observable(item.contact); //.location.formattedAddress.lng    
-    self.data.formattedPhone = ko.observable(item.contact.formattedPhone); //.contact.formattedPhone
-    self.data.name = ko.observable(item.name); //.name
-    self.data.url = ko.observable(item.url); //.location.url
+    self.data.formattedAddress = item.location.formattedAddress;
+    self.data.lat = item.location.lat; //.location.formattedAddress.lat
+    self.data.lng = item.location.lng; //.location.formattedAddress.lng   
+    self.data.contact = item.contact; //.location.formattedAddress.lng    
+    self.data.formattedPhone = item.contact.formattedPhone; //.contact.formattedPhone
+    self.data.name = item.name; //.name
+    self.data.url = item.url; //.location.url
   };
   
   //viewModel for knockout bindings to DOM
@@ -66,16 +66,13 @@ var MapsApplication = (function() {
     else {
       return ko.utils.arrayFilter(self.locations(), function (item) {
         //console.log(item.name())
-        return item.name().toLowerCase().indexOf(filter) !== -1;
+        return item.name.toLowerCase().indexOf(filter) !== -1;
       });
     }
   });
 
   self.allPlaces = [];
 
-  self.mapModel.forEach(function (values) {
-    self.allPlaces.push(new Place(values));
-  })
 
   var Place = function (data) {
     this.name = data.name;
@@ -83,7 +80,16 @@ var MapsApplication = (function() {
     this.marker = null;
   }
   
-  //Methods to retrieve locations info using foursquare 
+  self.mapModel.forEach(function (places) {
+    self.allPlaces.push(new Place(places));
+  });
+  
+  
+  console.log('array foe pushing new values to observable',self.allPlaces)
+ 
+
+  
+  //Methods to retrieve locations info usifng foursquare 
   var retrieveLocations = function () {
     console.log('retrieving locations from server: ');
     fourSquareAPI.getLocations(retrieveLocationsCallback);
@@ -96,7 +102,7 @@ var MapsApplication = (function() {
         return new locationModel(value.venue);
       });
       dataFromServer.forEach(function (value) {
-      self.locations.push(value.data);            
+      self.locations.push(value.data);         
         
       });
       //viewModel.search;
@@ -140,8 +146,8 @@ var MapsApplication = (function() {
   var placeMarker = function () {
     console.log('LookFirst',locations())
         locations().forEach(function(value, key) {
-          console.log('placeMarker locations obj', value.lat()); 
-          var markerCoordinates = new google.maps.LatLng(value.lat(), value.lng());
+          console.log('placeMarker locations obj', value.lat); 
+          var markerCoordinates = new google.maps.LatLng(value.lat, value.lng);
                                       
           var marker = new google.maps.Marker({
               animation: google.maps.Animation.DROP,
