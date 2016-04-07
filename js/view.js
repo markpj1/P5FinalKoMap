@@ -35,7 +35,7 @@ var MapsApplication = (function() {
         //placeMarker();  
         //console.log('binding working?????', this.marker);
     };
-    //self.data.marker = null;
+    self.data.marker = null;
 
   };  
 
