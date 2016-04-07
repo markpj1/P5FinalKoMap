@@ -11,10 +11,9 @@ var MapsApplication = (function() {
   var map;
   var localLocation = {lat:38.235738, lng:-122.641123};
   var fourSquareAPI = FourSquareClient('https://api.foursquare.com/v2/venues/explore?client_id=CYQXZPHH1KFEC0AQFBB3NLNSOE2KOQWJ40AU3BIG0YWLI2ZX&client_secret=MJV2WN3QLPZAHPMQ4GT5U212AVUPPZVDEKN3DCEOHFE4AMXW&v=20131016&ll=38.23%2C%20-122.64&section=food&limit=5&novelty=new');  
-  //var fourSquareObj;
-  var locationSearch;
-  //console.log('FSO',fourSquareObj)
- self.locationModel = function (item) {
+  
+  
+  self.locationModel = function (item) {
     var self = this;
     self.data = {};
     self.data.location = item.location; //.location.address 
@@ -25,70 +24,35 @@ var MapsApplication = (function() {
     self.data.formattedPhone = item.contact.formattedPhone; //.contact.formattedPhone
     self.data.name = item.name; //.name
     self.data.url = item.url; //.location.url
-  };
-  
-  //viewModel for knockout bindings to DOM
-  self.mapModel = [
-    {
-    "name": "Central Market Restaurant",    
-    "latLng": {"lat": 38.234017108732495, "lng": -122.64014482498169}    
-    },  
-    {
-    "name": "Cucina Paradiso",    
-    "latLng" : {"lat": 38.234490283333336,"lng": -122.6403}   
-    },  
-    {
-    "name": "Aqus Cafe",  
-    "latLng": {"lat": 38.23130418393807,"lng": -122.63134140350398}   
-    },  
-    {
-    "name": "Wild Goat Bistro" , 
-    "latLng" : {"lat": 38.233859,"lng": -122.638846}   
-    },  
-    {
-    "name": "Cafe Zazzle" , 
-    "latLng": {"lat": 38.23433575,"lng": -122.64162}   
-    },  
-  ];
+    self.data.marker = new google.maps.Marker({
+        position: new google.maps.LatLng(self.data.lat, self.data.lng),
+        map: map,
+        animation: google.maps.Animation.DROP,
+        icon: 'pics/restaurant.png'
+    });
+    self.data.openInfoWindow = function() {
+        //this.marker.infowindow.open(this.map, self.data.marker);
+        //placeMarker();  
+        console.log('binding working?????', this.marker);
+    };
+    //self.data.marker = null;
 
-
+  };  
 
   self.locations = ko.observableArray();
     
   self.query = ko.observable('');  
     
   self.filteredLocations = ko.computed(function () {    
-    var filter = self.query().toLowerCase();
-    if (!filter) {
-      return self.locations();
-    }
-    else {
-      return ko.utils.arrayFilter(self.locations(), function (item) {
-        //console.log(item.name())
-        return item.name.toLowerCase().indexOf(filter) !== -1;
-      });
-    }
-  });
-
-  self.allPlaces = [];
-
-
-  var Place = function (data) {
-    this.name = data.name;
-    this.latLng = data.latLng;
-    this.marker = null;
-  }
-  
-  self.mapModel.forEach(function (places) {
-    self.allPlaces.push(new Place(places));
+      var filter = self.query().toLowerCase();    
+      return ko.utils.arrayFilter(self.locations(), function (item) {         
+        var match = item.name.toLowerCase().indexOf(filter) !== -1;        
+        item.marker.setVisible(match);
+        return match;
+      });    
   });
   
-  
-  console.log('array foe pushing new values to observable',self.allPlaces)
- 
-
-  
-  //Methods to retrieve locations info usifng foursquare 
+  //Methods to retrieve locations info from foursquare 
   var retrieveLocations = function () {
     console.log('retrieving locations from server: ');
     fourSquareAPI.getLocations(retrieveLocationsCallback);
@@ -103,10 +67,7 @@ var MapsApplication = (function() {
       dataFromServer.forEach(function (value) {
       self.locations.push(value.data);         
         
-      });
-      //viewModel.search;
-      console.log('???????????????????????',dataFromServer)   
-      console.log('why again think', self.locations());
+      });           
       placeMarker();
   };
       
@@ -124,87 +85,53 @@ var MapsApplication = (function() {
 
         }
       };        
-       // var bounceMarker = placeHolder.lat() + ' ' + placeHolder.lng();
-       //      markerCoordinates = new google.maps.LatLng({lat:locations().data.location.lat(), lng:locations().data.location.lng()}); //this is where I think I need to use knockout observables?        
-       //      console.log('marker coords', markerCoordinates);
-       //    var infowindow = new google.maps.InfoWindow({
-       //      content: contentString
-       //    });  
-         
    };
-       // var placeMarker = function (location, value) {
-       //      var marker = new google.maps.Marker({
-       //        animation: google.maps.Animation.DROP,
-       //        position: localLocation,
-       //        map: map,
-       //        icon: 'pics/restaurant.png'
-       //      });
-            
-       //}
-
-  var placeMarker = function () {
-    console.log('LookFirst',locations())
-        locations().forEach(function(value, key) {
-          console.log('placeMarker locations obj', value.lat); 
-          var markerCoordinates = new google.maps.LatLng(value.lat, value.lng);
-                                      
-          var marker = new google.maps.Marker({
-              animation: google.maps.Animation.DROP,
-              position: markerCoordinates,
-              map: map,
-              icon: 'pics/restaurant.png'
-            });
-        });    
-  };
        
+
+  var placeMarker = function () {    
+        locations().forEach(function(value, key) {          
+          self.google.maps.event.addListener(value.marker, 'click', function() {            
+            //console.log(value.marker)
+            if (value.marker.getAnimation() != null) {
+              value.marker.setAnimation(null);
+              infowindow.open(null);
+            }
+             else if (infowindow.open() != null) {
+              value.marker.setAnimation(null);
+              infowindow.open(null);
+            }
+             else
+            {
+              value.marker.setAnimation(google.maps.Animation.BOUNCE);
+              infowindow.open(map, value.marker);
+            }
+      });            
       
-      //var contentString = '<div>' + placeHolder.nameArr()[key] + '</div>' + '<div>' + placeHolder.address()[key] + '</div>' + '<div>' + placeHolder.contact()[key] + '<div>' + '<div>' + '<a href=' + placeHolder.url()[key] + '>' + placeHolder.url()[key] + '</a>' + '</div>';
-   //    google.maps.event.addListener(marker, 'click', function() {
-   //      if (marker.getAnimation() != null) {
-   //        marker.setAnimation(null);
-   //        infowindow.open(null);
-   //      } else if (infowindow.open() != null) {
-   //        marker.setAnimation(null);
-   //        infowindow.open(null);
-   //      } else {
-   //        marker.setAnimation(google.maps.Animation.BOUNCE);
-   //        infowindow.open(map, marker);
-   //      }
-   //    });
+      var contentString = '<div>' + value.name + '</div>' + '<div>' + value.formattedAddress + '</div>' + '<div>' + value.formattedPhone + '<div>' + '<div>' + '<a href=' + value.url + '>' + value.url + '</a>' + '</div>';
+      
+      var infowindow = new google.maps.InfoWindow({
+            content: contentString
+          });    
 
-
-   //self.query.subscribe(self.search);
+    });    
+  };
+     
   var init = function() {
-    //code that initializes this module
-    //placeMarker();
-
+    //code that initializes this module   
     configureBindingHandlers();
     retrieveLocations(); 
-    ko.applyBindings(MapsApplication);
-    
-    
+    ko.applyBindings(MapsApplication);    
   };
 
 
-  $(init);
+  $(init); //Document Load ready JQuery function
 
 
-    //console.log('locations objjjjj', locations().length);
+    
   return {
     //members that are exposed publicly
-    //searchLocation: searchLocation,
-    //removeLocation: removeLocation,\
-    //mapped, mapped,
-    //search: search,
-    //placeMarker: placeMarker,
-    
-    mapModel: mapModel,
     query: query,
-    locationModel: locationModel,
-    
+    locationModel: locationModel       
   };
 
-
-
-
-}())
+}());
