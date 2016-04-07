@@ -19,5 +19,8 @@
     "knockout": "~3.4.0",
     "jquery": "~2.2.0",
     "bootstrap": "~3.3.6"
+  },
+  "devDependencies": {
+    "bower-knockout-mapping": "~2.6.0"
   }
 }
