@@ -33,7 +33,7 @@ var MapsApplication = (function() {
     self.data.openInfoWindow = function() {
         //this.marker.infowindow.open(this.map, self.data.marker);
         //placeMarker();  
-        console.log('binding working?????', this.marker);
+        //console.log('binding working?????', this.marker);
     };
     //self.data.marker = null;
 
