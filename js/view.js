@@ -26,16 +26,18 @@ var MapsApplication = (function() {
     self.data.url = item.url; //.location.url
     self.data.marker = new google.maps.Marker({
         position: new google.maps.LatLng(self.data.lat, self.data.lng),
-        map: map,
+        map: this.map,
         animation: google.maps.Animation.DROP,
         icon: 'pics/restaurant.png'
     });
-    self.data.openInfoWindow = function() {
-        //this.marker.infowindow.open(this.map, self.data.marker);
-        //placeMarker();  
-        //console.log('binding working?????', this.marker);
-    };
-    self.data.marker = null;
+    self.data.openInfoWindow =  function() {
+        //this.marker.
+       console.log('binding working?????', placeMarker);
+       placeMarker.infowindow.open(self.map, self.data.marker);//?????
+          
+    };   
+    
+    //self.data.marker = null;
 
   };  
 
@@ -65,10 +67,10 @@ var MapsApplication = (function() {
         return new locationModel(value.venue);
       });
       dataFromServer.forEach(function (value) {
-      self.locations.push(value.data);         
-        
+      self.locations.push(value.data);    
       });           
       placeMarker();
+      console.log(locations());
   };
       
   var configureBindingHandlers = function () {    
@@ -90,7 +92,9 @@ var MapsApplication = (function() {
 
   var placeMarker = function () {    
         locations().forEach(function(value, key) {          
-          self.google.maps.event.addListener(value.marker, 'click', function() {            
+    
+
+        self.google.maps.event.addListener(value.marker, 'click', function() {            
             //console.log(value.marker)
             if (value.marker.getAnimation() != null) {
               value.marker.setAnimation(null);
@@ -105,6 +109,9 @@ var MapsApplication = (function() {
               value.marker.setAnimation(google.maps.Animation.BOUNCE);
               infowindow.open(map, value.marker);
             }
+            setTimeout(function() {
+                    value.marker.setAnimation(null);
+                }, 10000);
       });            
       
       var contentString = '<div>' + value.name + '</div>' + '<div>' + value.formattedAddress + '</div>' + '<div>' + value.formattedPhone + '<div>' + '<div>' + '<a href=' + value.url + '>' + value.url + '</a>' + '</div>';
@@ -113,9 +120,12 @@ var MapsApplication = (function() {
             content: contentString
           });    
 
-    });    
+    });
+        
   };
-     
+
+
+   
   var init = function() {
     //code that initializes this module   
     configureBindingHandlers();
