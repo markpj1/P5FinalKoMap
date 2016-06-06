@@ -8,21 +8,17 @@ var FourSquareClient = function (url) {
       url: baseUrl,
       type: 'Get',
       success: function (result) {
-         // console.log('Foursquare Locations: ' +
-         //  JSON.stringify(result));
-            
+         console.log('Foursquare Locations: ' +
+          JSON.stringify(result));
+
           callback(result);
       }
-    })
+    });
   };
-  
+
   return {
     //add members that will be exposed publicly
     getLocations: getLocations
     //deleteLocations: deleteLocations
-  }   
+  };
 };
-
-
-
-
